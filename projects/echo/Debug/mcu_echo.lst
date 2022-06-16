@@ -831,7 +831,7 @@ static void uart_enable(void) {
  800057e:	f043 0304 	orr.w	r3, r3, #4
  8000582:	60d3      	str	r3, [r2, #12]
 
-    // enable usart2 - UE, bit 13
+    // Enable usart2 - UE, bit 13
     USART2->CR1 |= (1 << 13);
  8000584:	4b0a      	ldr	r3, [pc, #40]	; (80005b0 <uart_enable+0x44>)
  8000586:	68db      	ldr	r3, [r3, #12]

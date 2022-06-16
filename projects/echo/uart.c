@@ -102,7 +102,7 @@ static void uart_enable(void) {
     // USART2 RX enable, RE bit 2
     USART2->CR1 |= (1 << 2);
 
-    // enable usart2 - UE, bit 13
+    // Enable usart2 - UE, bit 13
     USART2->CR1 |= (1 << 13);
 
     // baud rate = fCK / (8 * (2 - OVER8) * USARTDIV)
