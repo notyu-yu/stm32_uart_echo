@@ -3,7 +3,7 @@ Debug/uart.d: uart.c uart.h ../../include/stm32f411xe.h \
  ../../include/cmsis_compiler.h ../../include/cmsis_gcc.h \
  ../../include/mpu_armv7.h ../../include/system_stm32f4xx.h \
  ../../include/stm32f4xx.h ../../include/stm32f411xe.h \
- ../../include/system_stm32f4xx.h
+ ../../include/system_stm32f4xx.h config.h
 uart.h:
 ../../include/stm32f411xe.h:
 ../../include/core_cm4.h:
@@ -15,3 +15,4 @@ uart.h:
 ../../include/stm32f4xx.h:
 ../../include/stm32f411xe.h:
 ../../include/system_stm32f4xx.h:
+config.h:

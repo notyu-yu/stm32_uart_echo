@@ -1,17 +1,19 @@
 #include "../../include/stm32f411xe.h"
 #include "../../include/system_stm32f4xx.h"
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-#define BUFFER_SIZE 1024
+// Message buffer
+extern char msg_buffer[BUFFERSIZE];
 
-extern char msg_buffer[BUFFER_SIZE];
-
-void uart_init(void);
-void uart_send(void * data, size_t size);
-void uart_receive(void * buffer, size_t size);
+// UART Functions
+void uart_init(void); // Initialize uart registers
+void uart_send(void * data, size_t size); // Send size bytes of data starting at data pointer
+void uart_receive(void * buffer, size_t size); // Receive size bytes of data and write to buffer
 
 typedef enum {
 	GREEN=12,
@@ -20,7 +22,8 @@ typedef enum {
 	BLUE
 } led;
 
-void led_init(void);
-void led_on(led l);
-void led_off(led l);
-void led_toggle(led l);
+// LED functions
+void led_init(void); // Initialize LED GPIO pins
+void led_on(led l); // Turn on LED
+void led_off(led l); // Turn off LED
+void led_toggle(led l); // Toggle LED state
