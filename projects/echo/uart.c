@@ -8,18 +8,12 @@ char msg_buffer[BUFFERSIZE] = {0};
 
 // Send content of pointer through uart
 void uart_send(void * data, size_t size) {
-    // USART2 TX enable, TE bit 3
-    USART2->CR1 |= (1 << 3);
-
 	for (size_t i=0; i<size; i++){
 		// Send character
 		USART2->DR = ((char *)data)[i];
 		// Wait for transmit complete
 		while(!(USART2->SR & (1 << 6)));
 	}
-
-    // USART2 TX disable, TE bit 3
-    USART2->CR1 &= ~(1 << 3);
 }
 
 // Receive size bytes of content from uart and write it to buffer
@@ -27,19 +21,12 @@ void uart_receive(void * buffer, size_t size)  {
 	// USART CR2 configure stop bit count, default 1
 	// USART2->CR2 &= ~(0x3U << 12);
 	// USART2->CR2 != (0x0U << 12);
-	
-	// Set RE bit to 1
-	USART2->CR2 |= (0x1U << 2);
-
 	for (size_t i=0; i < size; i++) {
 		// Wait until RXNE bit is set
 		while (!(USART2->SR & (0x1U << 5))){};
 		// Receive character
 		((char *)buffer)[i] = USART2->DR;
 	}
-
-	// Reset RE bit to 0
-	USART2->CR2 &= ~(0x1U << 2);
 }
 
 // Setup GPIO A2 and A3 pins for UART
@@ -101,6 +88,8 @@ static void uart_enable(void) {
 
     // USART2 RX enable, RE bit 2
     USART2->CR1 |= (1 << 2);
+    // USART2 TX enable, TE bit 3
+    USART2->CR1 |= (1 << 3);
 
     // Enable usart2 - UE, bit 13
     USART2->CR1 |= (1 << 13);
