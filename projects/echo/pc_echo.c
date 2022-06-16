@@ -32,6 +32,7 @@ int main(int argc, char ** argv) {
 	char send_buffer[BUFFERSIZE] = {0};
 	char line_buffer[BUFFERSIZE] = {0};
 	char receive_buffer[BUFFERSIZE*2] = {0};
+	char echo_buffer[BUFFERSIZE*2] = {0};
 	size_t msg_size = 0;
 	size_t bytes_read = 0;
 	size_t chunk_read = 0;
@@ -68,13 +69,21 @@ int main(int argc, char ** argv) {
 	while (bytes_read < msg_size) {
 		chunk_read = read(fd, receive_buffer, BUFFERSIZE);
 		bytes_read += chunk_read;
-		for (size_t i=0; i<chunk_read; i++) {
-			putchar(receive_buffer[i]);
-		}
+		strncat(echo_buffer, receive_buffer, chunk_read);
 	}
 
+	puts(echo_buffer);
+	
 	if (VERBOSE) {
 		printf("Read %zu bytes\n", bytes_read);
+	}
+
+	// Final checks
+	if (strlen(echo_buffer) != strlen(send_buffer)) {
+		printf("WARNING: echoed message length (%zu)  different from orignal message length (%zu).\n", strlen(echo_buffer), strlen(send_buffer));
+	}
+	if(strncmp(send_buffer, echo_buffer, BUFFERSIZE)) {
+		printf("WARNING: echoed message different from message sent\n");
 	}
 
 	return 0;
