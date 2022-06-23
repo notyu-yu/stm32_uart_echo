@@ -6,6 +6,7 @@
 #include <string.h>
 #include <assert.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "config.h"
 
@@ -29,6 +30,7 @@ static void serial_setup(int fd) {
 	tcsetattr(fd, TCSANOW, &serial_settings); // Apply settings
 }
 
+// Measure
 
 int main(int argc, char ** argv) {
 	int fd;
@@ -39,6 +41,8 @@ int main(int argc, char ** argv) {
 	size_t msg_size = 0;
 	size_t bytes_read = 0;
 	size_t chunk_read = 0;
+
+	int iterations = 100;
 
 	// Open serial device
 	fd = open(SERIALDEV, O_RDWR | O_NOCTTY);
@@ -60,34 +64,42 @@ int main(int argc, char ** argv) {
 		printf("Sending message: %s\n", send_buffer);
 		printf("Message size: %zu bytes\n", msg_size);
 	}
-	// Send message size
-	assert(write(fd, &msg_size, sizeof(size_t)) == sizeof(size_t));
-	tcdrain(fd);
 
-	// Send message content
-	assert(write(fd, send_buffer, msg_size) == msg_size);
-	tcdrain(fd);
+	for (int iter=0; iter<iterations; iter++) {
+		// Send message size
+		assert(write(fd, &msg_size, sizeof(size_t)) == sizeof(size_t));
+		tcdrain(fd);
 
-	// Read message in 64 bit chunks and print
-	while (bytes_read < msg_size) {
-		chunk_read = read(fd, receive_buffer, msg_size-bytes_read);
-		bytes_read += chunk_read;
-		strncat(echo_buffer, receive_buffer, chunk_read);
+		// Send message content
+		assert(write(fd, send_buffer, msg_size) == msg_size);
+		tcdrain(fd);
+
+		// Read message in 64 bit chunks and print
+		while (bytes_read < msg_size) {
+			chunk_read = read(fd, receive_buffer, msg_size-bytes_read);
+			bytes_read += chunk_read;
+			strncat(echo_buffer, receive_buffer, chunk_read);
+			memset(receive_buffer, 0, BUFFERSIZE*2);
+		}
+
+		if (iterations <= 1) {
+			puts(echo_buffer);
+		}
+		
+		if (VERBOSE) {
+			printf("Read %zu bytes\n", bytes_read);
+		}
+
+		// Final checks
+		if (strlen(echo_buffer) != strlen(send_buffer)) {
+			printf("WARNING: echoed message length (%zu)  different from orignal message length (%zu).\n", strlen(echo_buffer), strlen(send_buffer));
+		}
+		if(strncmp(send_buffer, echo_buffer, BUFFERSIZE)) {
+			printf("WARNING: echoed message different from message sent\n");
+		}
+		memset(echo_buffer, 0, BUFFERSIZE*2);
+		tcflush(fd, TCIOFLUSH); // Clear IO buffer
+		bytes_read = 0;
 	}
-
-	puts(echo_buffer);
-	
-	if (VERBOSE) {
-		printf("Read %zu bytes\n", bytes_read);
-	}
-
-	// Final checks
-	if (strlen(echo_buffer) != strlen(send_buffer)) {
-		printf("WARNING: echoed message length (%zu)  different from orignal message length (%zu).\n", strlen(echo_buffer), strlen(send_buffer));
-	}
-	if(strncmp(send_buffer, echo_buffer, BUFFERSIZE)) {
-		printf("WARNING: echoed message different from message sent\n");
-	}
-
 	return 0;
 }
