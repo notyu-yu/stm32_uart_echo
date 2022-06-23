@@ -21,12 +21,13 @@ static void serial_setup(int fd) {
 	serial_settings.c_cflag &= ~CRTSCTS; // Hardware based flow control off
 	serial_settings.c_cflag |= CREAD | CLOCAL; // Turn on receiver
 	serial_settings.c_iflag &= ~(IXON | IXOFF | IXANY); // Software based flow control off
-	serial_settings.c_iflag &= ~(ICANON | ECHO | ISIG); // Use non-canonical mode, no echo or signals
-	serial_settings.c_oflag &= ~(ONLCR); // Don't turn \n to \n\r
+	serial_settings.c_lflag &= ~(ICANON | ECHO); // Set operation mode, canonical, enable input echo and receiving signals
+	serial_settings.c_oflag &= ~(ONLCR); // Don't turn /n to /n/r
+	// Read for 0.5 seconds at max
+	// serial_settings.c_cc[VTIME] = 5;
 	tcflush(fd, TCIOFLUSH); // Clear IO buffer
-	tcsetattr(fd, TCSAFLUSH, &serial_settings); // Apply settings
+	tcsetattr(fd, TCSANOW, &serial_settings); // Apply settings
 }
-
 
 int main(int argc, char ** argv) {
 	int fd;
@@ -58,6 +59,7 @@ int main(int argc, char ** argv) {
 		printf("Sending message: %s\n", send_buffer);
 		printf("Message size: %zu bytes\n", msg_size);
 	}
+
 	// Send message size
 	assert(write(fd, &msg_size, sizeof(size_t)) == sizeof(size_t));
 	tcdrain(fd);
@@ -68,9 +70,10 @@ int main(int argc, char ** argv) {
 
 	// Read message in 64 bit chunks and print
 	while (bytes_read < msg_size) {
-		chunk_read = read(fd, receive_buffer, BUFFERSIZE);
+		chunk_read = read(fd, receive_buffer, msg_size-bytes_read);
 		bytes_read += chunk_read;
 		strncat(echo_buffer, receive_buffer, chunk_read);
+		memset(receive_buffer, 0, BUFFERSIZE*2);
 	}
 
 	puts(echo_buffer);
@@ -86,6 +89,7 @@ int main(int argc, char ** argv) {
 	if(strncmp(send_buffer, echo_buffer, BUFFERSIZE)) {
 		printf("WARNING: echoed message different from message sent\n");
 	}
+	tcflush(fd, TCIOFLUSH); // Clear IO buffer
 
 	return 0;
 }

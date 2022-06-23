@@ -1,5 +1,5 @@
 TARGET = mcu_echo
-SRCS = mcu_echo.c uart.c
+SRCS = mcu_echo.c uart_dma.c uart.c
 
 LINKER_SCRIPT = ../../flash/STM32F411VEHX_FLASH.ld
 

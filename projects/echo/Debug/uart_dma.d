@@ -1,4 +1,4 @@
-Debug/mcu_echo.d: mcu_echo.c uart_dma.h uart.h \
+Debug/uart_dma.d: uart_dma.c uart_dma.h uart.h \
  ../../include/stm32f411xe.h ../../include/core_cm4.h \
  ../../include/cmsis_version.h ../../include/cmsis_compiler.h \
  ../../include/cmsis_gcc.h ../../include/mpu_armv7.h \
