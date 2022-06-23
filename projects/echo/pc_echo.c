@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <termios.h>
@@ -22,9 +21,12 @@ static void serial_setup(int fd) {
 	serial_settings.c_cflag &= ~CRTSCTS; // Hardware based flow control off
 	serial_settings.c_cflag |= CREAD | CLOCAL; // Turn on receiver
 	serial_settings.c_iflag &= ~(IXON | IXOFF | IXANY); // Software based flow control off
-	serial_settings.c_iflag |= ICANON | ECHO | ECHOE | ECHOK | ISIG; // Set operation mode, canonical, enable input echo and receiving signals
+	serial_settings.c_lflag &= ~(ICANON | ECHO); // Set operation mode, canonical, enable input echo and receiving signals
+	serial_settings.c_oflag &= ~(ONLCR); // Don't turn /n to /n/r
+	// Read for 0.5 seconds at max
+	// serial_settings.c_cc[VTIME] = 5;
 	tcflush(fd, TCIOFLUSH); // Clear IO buffer
-	tcsetattr(fd, TCSAFLUSH, &serial_settings); // Apply settings
+	tcsetattr(fd, TCSANOW, &serial_settings); // Apply settings
 }
 
 
@@ -68,7 +70,7 @@ int main(int argc, char ** argv) {
 
 	// Read message in 64 bit chunks and print
 	while (bytes_read < msg_size) {
-		chunk_read = read(fd, receive_buffer, BUFFERSIZE);
+		chunk_read = read(fd, receive_buffer, msg_size-bytes_read);
 		bytes_read += chunk_read;
 		strncat(echo_buffer, receive_buffer, chunk_read);
 	}
