@@ -20,9 +20,9 @@ static void serial_setup(int fd) {
 
 	serial_settings.c_cflag &= ~CRTSCTS; // Hardware based flow control off
 	serial_settings.c_cflag |= CREAD | CLOCAL; // Turn on receiver
-	serial_settings.c_iflag &= ~(IXON | IXOFF | IXANY); // Software based flow control off
-	serial_settings.c_lflag &= ~(ICANON | ECHO); // Set operation mode, canonical, enable input echo and receiving signals
-	serial_settings.c_oflag &= ~(ONLCR); // Don't turn /n to /n/r
+	serial_settings.c_iflag &= ~(IXON | IXOFF | IXANY); // Software based flow control off, no parity marking
+	serial_settings.c_lflag &= ~(ICANON | ECHO | ISIG); // Set operation mode, canonical, enable input echo and receiving signals
+	serial_settings.c_oflag &= ~(ONLCR | OFILL); // Don't turn /n to /n/r, don't send fill characters
 	// Read for 0.5 seconds at max
 	// serial_settings.c_cc[VTIME] = 5;
 	tcflush(fd, TCIOFLUSH); // Clear IO buffer
@@ -63,10 +63,12 @@ int main(int argc, char ** argv) {
 	// Send message size
 	assert(write(fd, &msg_size, sizeof(size_t)) == sizeof(size_t));
 	tcdrain(fd);
+	tcflush(fd, TCIOFLUSH); // Clear IO buffer
 
 	// Send message content
 	assert(write(fd, send_buffer, msg_size) == msg_size);
 	tcdrain(fd);
+	tcflush(fd, TCIOFLUSH); // Clear IO buffer
 
 	// Read message in 64 bit chunks and print
 	while (bytes_read < msg_size) {
