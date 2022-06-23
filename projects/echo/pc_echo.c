@@ -21,7 +21,8 @@ static void serial_setup(int fd) {
 	serial_settings.c_cflag &= ~CRTSCTS; // Hardware based flow control off
 	serial_settings.c_cflag |= CREAD | CLOCAL; // Turn on receiver
 	serial_settings.c_iflag &= ~(IXON | IXOFF | IXANY); // Software based flow control off
-	serial_settings.c_iflag |= ICANON | ECHO | ECHOE | ECHOK | ISIG; // Set operation mode, canonical, enable input echo and receiving signals
+	serial_settings.c_iflag &= ~(ICANON | ECHO | ISIG); // Use non-canonical mode, no echo or signals
+	serial_settings.c_oflag &= ~(ONLCR); // Don't turn \n to \n\r
 	tcflush(fd, TCIOFLUSH); // Clear IO buffer
 	tcsetattr(fd, TCSAFLUSH, &serial_settings); // Apply settings
 }
