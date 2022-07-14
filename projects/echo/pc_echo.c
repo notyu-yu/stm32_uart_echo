@@ -18,11 +18,8 @@ static void serial_setup(int fd) {
 	cfsetispeed(&serial_settings, BAUDRATE);
 	cfsetospeed(&serial_settings, BAUDRATE);
 
-	serial_settings.c_cflag &= ~CRTSCTS; // Hardware based flow control off
-	serial_settings.c_cflag |= CREAD | CLOCAL; // Turn on receiver
-	serial_settings.c_iflag &= ~(IXON | IXOFF | IXANY); // Software based flow control off, no parity marking
-	serial_settings.c_lflag &= ~(ICANON | ECHO | ISIG); // Set operation mode, canonical, enable input echo and receiving signals
-	serial_settings.c_oflag &= ~(ONLCR | OFILL); // Don't turn /n to /n/r, don't send fill characters
+	cfmakeraw(&serial_settings);
+
 	// Read for 0.5 seconds at max
 	// serial_settings.c_cc[VTIME] = 5;
 	tcflush(fd, TCIOFLUSH); // Clear IO buffer
